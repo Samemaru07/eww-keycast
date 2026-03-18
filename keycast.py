@@ -122,6 +122,7 @@ async def hide_after(delay: float):
 
 
 current_text = ""
+MAX_LENGTH = 20
 
 
 async def show_key(text: str):
@@ -129,13 +130,16 @@ async def show_key(text: str):
 
     if hide_task and not hide_task.done():
         hide_task.cancel()
-        current_text = current_text + text
+        new_text = current_text + text
+        if len(new_text) > MAX_LENGTH:
+            current_text = text
+        else:
+            current_text = new_text
     else:
         current_text = text
 
     monitor = get_focused_monitor()
     subprocess.run([EWW_CMD, "update", f"keycast-text={current_text}"])
-
     hide_task = asyncio.create_task(hide_after(DISPLAY_DURATION))
 
 
