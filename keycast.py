@@ -118,7 +118,7 @@ def build_display(key: str) -> str:
 
 async def hide_after(delay: float):
     await asyncio.sleep(delay)
-    subprocess.run([EWW_CMD, "close", "keycast"])
+    subprocess.run([EWW_CMD, "update", "keycast-text="])
 
 
 current_text = ""
