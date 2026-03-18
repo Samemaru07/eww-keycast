@@ -130,7 +130,8 @@ async def show_key(text: str):
 
     if hide_task and not hide_task.done():
         hide_task.cancel()
-        new_text = current_text + text
+        separator = " " if len(text) > 1 else ""
+        new_text = current_text + separator + text
         if len(new_text) > MAX_LENGTH:
             current_text = text
         else:
