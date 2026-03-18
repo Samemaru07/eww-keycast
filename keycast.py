@@ -125,12 +125,15 @@ current_text = ""
 MAX_LENGTH = 20
 
 
+last_key_was_special = False
+
+
 async def show_key(text: str):
-    global hide_task, current_text
+    global hide_task, current_text, last_key_was_special
 
     if hide_task and not hide_task.done():
         hide_task.cancel()
-        separator = " " if len(text) > 1 else ""
+        separator = " " if len(text) > 1 or text == "⌫" or last_key_was_special else ""
         new_text = current_text + separator + text
         if len(new_text) > MAX_LENGTH:
             current_text = text
@@ -139,6 +142,7 @@ async def show_key(text: str):
     else:
         current_text = text
 
+    last_key_was_special = len(text) > 1 or text == "⌫"
     monitor = get_focused_monitor()
     subprocess.run([EWW_CMD, "update", f"keycast-text={current_text}"])
     hide_task = asyncio.create_task(hide_after(DISPLAY_DURATION))
