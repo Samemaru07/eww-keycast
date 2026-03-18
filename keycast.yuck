@@ -16,6 +16,7 @@
 (defwindow keycast
     :stacking "overlay"
     :focusable false
+    :transparent true
     :geometry (geometry :anchor "bottom right"
                         :x "30px"
                         :y "30px"
