@@ -90,14 +90,17 @@ def get_focused_monitor() -> int:
 
 
 def keyname(key_str: str) -> str | None:
-    """キー名を表示用文字列に変換。修飾キーはNoneを返す"""
     if key_str in MODIFIER_KEYS:
         return None
     if key_str in SPECIAL_KEYS:
         return SPECIAL_KEYS[key_str]
-    # KEY_A → A, KEY_1 → 1
-    if key_str.startswith("KEY_") and len(key_str) == 5:
-        return key_str[4:]
+    if key_str.startswith("KEY_"):
+        rest = key_str[4:]
+        if len(rest) == 1:
+            if "Shift" in active_modifiers:
+                return rest.upper()
+            else:
+                return rest.lower()
     return None
 
 
@@ -127,9 +130,12 @@ async def show_key(text: str):
     monitor = get_focused_monitor()
 
     subprocess.run([EWW_CMD, "update", f"keycast-text={text}"])
-    subprocess.run([EWW_CMD, "open", "keycast", "--screen", str(monitor)])
+    subprocess.run(
+        [EWW_CMD, "open", "keycast", "--screen", str(monitor), "--no-daemonize"]
+    )
 
     hide_task = asyncio.create_task(hide_after(DISPLAY_DURATION))
+    print(f"monitor: {monitor}")
 
 
 def find_keyboards() -> list[InputDevice]:
@@ -164,6 +170,7 @@ async def watch_device(dev: InputDevice):
             else:
                 display = build_display(key_str)
                 if display:
+                    print(f"display: {display}")
                     await show_key(display)
 
         elif key_event.keystate == KeyEvent.key_up:
@@ -178,7 +185,12 @@ async def main():
         return
 
     print(f"監視中: {[dev.name for dev in keyboards]}")
-    await asyncio.gather(*[watch_device(dev) for dev in keyboards])
+    try:
+        await asyncio.gather(*[watch_device(dev) for dev in keyboards])
+    except asyncio.CancelledError:
+        pass
+    finally:
+        subprocess.run([EWW_CMD, "close", "keycast"])
 
 
 if __name__ == "__main__":

@@ -7,20 +7,20 @@
          :valign "center"
          :space-evenly false
          (label :class "keycast-label"
+                :limit-width 0
                 :text keycast-text
          )
     )
 )
 
 (defwindow keycast
-    :monitor "DP-2"
     :stacking "overlay"
     :focusable false
     :geometry (geometry :anchor "bottom right"
                         :x "30px"
                         :y "30px"
-                        :width "auto"
-                        :height "auto"
+                        :width "500px"
+                        :height "60px"
     )
     (keycast-widget)
 )
