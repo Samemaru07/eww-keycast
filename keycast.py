@@ -135,9 +135,6 @@ async def show_key(text: str):
 
     monitor = get_focused_monitor()
     subprocess.run([EWW_CMD, "update", f"keycast-text={current_text}"])
-    subprocess.run(
-        [EWW_CMD, "open", "keycast", "--screen", str(monitor), "--no-daemonize"]
-    )
 
     hide_task = asyncio.create_task(hide_after(DISPLAY_DURATION))
 
@@ -187,6 +184,9 @@ async def main():
     if not keyboards:
         print("キーボードデバイスが見つかりませんでした")
         return
+
+    monitor = get_focused_monitor()
+    subprocess.run([EWW_CMD, "open", "keycast", "--screen", str(monitor)])
 
     print(f"監視中: {[dev.name for dev in keyboards]}")
     try:
