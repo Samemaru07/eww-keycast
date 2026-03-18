@@ -164,6 +164,8 @@ async def watch_device(dev: InputDevice):
         key_str = evdev.ecodes.KEY.get(event.code, f"KEY_{event.code}")
         if isinstance(key_str, list):
             key_str = key_str[0]
+        if isinstance(key_str, tuple):
+            key_str = key_str[0]
 
         if key_event.keystate == KeyEvent.key_down:
             if key_str in MODIFIER_KEYS:
