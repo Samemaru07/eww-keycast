@@ -69,6 +69,30 @@ SPECIAL_KEYS = {
     "KEY_SLASH": "/",
 }
 
+SHIFT_SYMBOLS = {
+    "1": "!",
+    "2": "@",
+    "3": "#",
+    "4": "$",
+    "5": "%",
+    "6": "^",
+    "7": "&",
+    "8": "*",
+    "9": "(",
+    "0": ")",
+    "-": "_",
+    "=": "+",
+    "[": "{",
+    "]": "}",
+    "\\": "|",
+    ";": ":",
+    "'": '"',
+    ",": "<",
+    ".": ">",
+    "/": "?",
+    "`": "~",
+}
+
 # 現在押されている修飾キー
 active_modifiers: set[str] = set()
 hide_task: asyncio.Task | None = None
@@ -90,32 +114,37 @@ def get_focused_monitor() -> int:
     return 0
 
 
-def keyname(key_str: str) -> str | None:
+def keyname(key_str: str) -> tuple[str | None, bool]:
+    """(表示名, Shiftを消費したか)"""
     if key_str in MODIFIER_KEYS:
-        return None
+        return None, False
     if key_str in SPECIAL_KEYS:
-        return SPECIAL_KEYS[key_str]
+        return SPECIAL_KEYS[key_str], False
     if key_str.startswith("KEY_"):
         rest = key_str[4:]
         if len(rest) == 1:
             caps = any(ecodes.LED_CAPSL in (dev.leds() or []) for dev in keyboards)
-            shift = "Shift" in active_modifiers
+            shift = "󰘶" in active_modifiers
+            if shift and rest.lower() in SHIFT_SYMBOLS:
+                return SHIFT_SYMBOLS[rest.lower()], True
             if caps ^ shift:
-                return rest.upper()
+                return rest.upper(), False
             else:
-                return rest.lower()
-    return None
+                return rest.lower(), False
+    return None, False
 
 
 def build_display(key: str) -> str:
-    """修飾キー+メインキーの表示文字列を組み立てる"""
+    main, shift_consumed = keyname(key)
+    if main is None:
+        return ""
     parts = []
-    for mod in ["󰘴", "󰣇", "󰘵", "󰘶"]:
+    for mod in ["󰘴", "󰣇", "󰘵"]:
         if mod in active_modifiers:
             parts.append(mod)
-    main = keyname(key)
-    if main:
-        parts.append(main)
+    if not shift_consumed and "󰘶" in active_modifiers:
+        parts.append("󰘶")
+    parts.append(main)
     return " + ".join(parts)
 
 
