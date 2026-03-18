@@ -116,7 +116,7 @@ def build_display(key: str) -> str:
     main = keyname(key)
     if main:
         parts.append(main)
-    return "+".join(parts)
+    return " + ".join(parts)
 
 
 async def hide_after(delay: float):
