@@ -12,24 +12,24 @@ EWW_CMD = "/usr/bin/eww"
 
 # 修飾キーのマッピング
 MODIFIER_KEYS = {
-    "KEY_LEFTCTRL": "Ctrl",
-    "KEY_RIGHTCTRL": "Ctrl",
-    "KEY_LEFTSHIFT": "Shift",
-    "KEY_RIGHTSHIFT": "Shift",
-    "KEY_LEFTALT": "Alt",
-    "KEY_RIGHTALT": "Alt",
-    "KEY_LEFTMETA": "Super",
-    "KEY_RIGHTMETA": "Super",
+    "KEY_LEFTCTRL": "󰘴",
+    "KEY_RIGHTCTRL": "󰘴",
+    "KEY_LEFTSHIFT": "󰘶",
+    "KEY_RIGHTSHIFT": "󰘶",
+    "KEY_LEFTALT": "󰘵",
+    "KEY_RIGHTALT": "󰘵",
+    "KEY_LEFTMETA": "󰣇",
+    "KEY_RIGHTMETA": "󰣇",
 }
 
 # 特殊キーの表示名
 SPECIAL_KEYS = {
-    "KEY_SPACE": "Space",
-    "KEY_ENTER": "Enter",
-    "KEY_TAB": "Tab",
+    "KEY_SPACE": "󱁐",
+    "KEY_ENTER": "󰌑",
+    "KEY_TAB": "",
     "KEY_BACKSPACE": "⌫",
-    "KEY_ESC": "Esc",
-    "KEY_DELETE": "Del",
+    "KEY_ESC": "󱊷",
+    "KEY_DELETE": "󰆴",
     "KEY_INSERT": "Ins",
     "KEY_HOME": "Home",
     "KEY_END": "End",
@@ -107,7 +107,7 @@ def keyname(key_str: str) -> str | None:
 def build_display(key: str) -> str:
     """修飾キー+メインキーの表示文字列を組み立てる"""
     parts = []
-    for mod in ["Ctrl", "Super", "Alt", "Shift"]:
+    for mod in ["󰘴", "󰣇", "󰘵", "󰘶"]:
         if mod in active_modifiers:
             parts.append(mod)
     main = keyname(key)
@@ -123,6 +123,7 @@ async def hide_after(delay: float):
 
 current_text = ""
 MAX_LENGTH = 20
+SPECIAL_VALUES = set(SPECIAL_KEYS.values())
 
 
 last_key_was_special = False
@@ -133,7 +134,11 @@ async def show_key(text: str):
 
     if hide_task and not hide_task.done():
         hide_task.cancel()
-        separator = " " if len(text) > 1 or text == "⌫" or last_key_was_special else ""
+        separator = (
+            " "
+            if len(text) > 1 or text in SPECIAL_VALUES or last_key_was_special
+            else ""
+        )
         new_text = current_text + separator + text
         if len(new_text) > MAX_LENGTH:
             current_text = text
@@ -142,7 +147,7 @@ async def show_key(text: str):
     else:
         current_text = text
 
-    last_key_was_special = len(text) > 1 or text == "⌫"
+    last_key_was_special = len(text) > 1 or text in SPECIAL_VALUES
     monitor = get_focused_monitor()
     subprocess.run([EWW_CMD, "update", f"keycast-text={current_text}"])
     hide_task = asyncio.create_task(hide_after(DISPLAY_DURATION))
