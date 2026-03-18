@@ -51,7 +51,7 @@ SPECIAL_KEYS = {
     "KEY_F10": "F10",
     "KEY_F11": "F11",
     "KEY_F12": "F12",
-    "KEY_CAPSLOCK": "Caps",
+    "KEY_CAPSLOCK": "󰌎",
     "KEY_SYSRQ": "PrtSc",
     "KEY_SCROLLLOCK": "ScrLk",
     "KEY_PAUSE": "Pause",
@@ -72,6 +72,7 @@ SPECIAL_KEYS = {
 # 現在押されている修飾キー
 active_modifiers: set[str] = set()
 hide_task: asyncio.Task | None = None
+keyboards: list[InputDevice] = []
 
 
 def get_focused_monitor() -> int:
@@ -97,7 +98,9 @@ def keyname(key_str: str) -> str | None:
     if key_str.startswith("KEY_"):
         rest = key_str[4:]
         if len(rest) == 1:
-            if "Shift" in active_modifiers:
+            caps = any(ecodes.LED_CAPSL in (dev.leds() or []) for dev in keyboards)
+            shift = "Shift" in active_modifiers
+            if caps ^ shift:
                 return rest.upper()
             else:
                 return rest.lower()
@@ -191,11 +194,16 @@ async def watch_device(dev: InputDevice):
                     await show_key(display)
 
         elif key_event.keystate == KeyEvent.key_up:
+            if key_str == "KEY_CAPSLOCK":
+                await asyncio.sleep(0.05)
+                caps = any(ecodes.LED_CAPSL in (dev.leds() or []) for dev in keyboards)
+                subprocess.run([EWW_CMD, "update", f"caps-lock={str(caps).lower()}"])
             if key_str in MODIFIER_KEYS:
                 active_modifiers.discard(MODIFIER_KEYS[key_str])
 
 
 async def main():
+    global keyboards
     keyboards = find_keyboards()
     if not keyboards:
         print("キーボードデバイスが見つかりませんでした")
@@ -203,6 +211,8 @@ async def main():
 
     monitor = get_focused_monitor()
     subprocess.run([EWW_CMD, "open", "keycast", "--screen", str(monitor)])
+    caps = any(ecodes.LED_CAPSL in (dev.leds() or []) for dev in keyboards)
+    subprocess.run([EWW_CMD, "update", f"caps-lock={str(caps).lower()}"])
 
     print(f"監視中: {[dev.name for dev in keyboards]}")
     try:

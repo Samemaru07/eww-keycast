@@ -1,7 +1,7 @@
 (defvar keycast-text "")
 
 (defwidget keycast-widget []
-    (box :class "keycast-bg"
+    (box :class "keycast-bg ${caps-lock ? "keycast-caps" : ""}"
          :orientation "h"
          :halign "center"
          :valign "center"
@@ -25,3 +25,5 @@
     )
     (keycast-widget)
 )
+
+(defvar caps-lock false)
