@@ -1,0 +1,26 @@
+(defvar keycast-text "")
+
+(defwidget keycast-widget []
+    (box :class "keycast-container"
+         :orientation "h"
+         :halign "center"
+         :valign "center"
+         :space-evenly false
+         (label :class "keycast-label"
+                :text keycast-text
+         )
+    )
+)
+
+(defwindow keycast
+    :monitor "DP-2"
+    :stacking "overlay"
+    :focusable false
+    :geometry (geometry :anchor "bottom right"
+                        :x "30px"
+                        :y "30px"
+                        :width "auto"
+                        :height "auto"
+    )
+    (keycast-widget)
+)
