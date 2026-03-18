@@ -1,7 +1,7 @@
 (defvar keycast-text "")
 
 (defwidget keycast-widget []
-    (box :class "keycast-container"
+    (box :class "keycast-bg"
          :orientation "h"
          :halign "center"
          :valign "center"
