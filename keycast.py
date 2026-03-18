@@ -121,21 +121,25 @@ async def hide_after(delay: float):
     subprocess.run([EWW_CMD, "close", "keycast"])
 
 
+current_text = ""
+
+
 async def show_key(text: str):
-    global hide_task
+    global hide_task, current_text
 
     if hide_task and not hide_task.done():
         hide_task.cancel()
+        current_text = current_text + text
+    else:
+        current_text = text
 
     monitor = get_focused_monitor()
-
-    subprocess.run([EWW_CMD, "update", f"keycast-text={text}"])
+    subprocess.run([EWW_CMD, "update", f"keycast-text={current_text}"])
     subprocess.run(
         [EWW_CMD, "open", "keycast", "--screen", str(monitor), "--no-daemonize"]
     )
 
     hide_task = asyncio.create_task(hide_after(DISPLAY_DURATION))
-    print(f"monitor: {monitor}")
 
 
 def find_keyboards() -> list[InputDevice]:
