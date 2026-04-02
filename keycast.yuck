@@ -19,7 +19,7 @@
     :transparent true
     :geometry (geometry :anchor "bottom right"
                         :x "30px"
-                        :y "30px"
+                        :y "70px"
                         :width "500px"
                         :height "60px"
     )
